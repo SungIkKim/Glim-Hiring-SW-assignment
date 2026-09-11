@@ -1,0 +1,197 @@
+/**
+ * @file main.cpp
+ * @brief ImageProcessor 진입점 — 지원자가 작성해야 할 파일입니다.
+ *
+ * BMP 입출력과 커맨드라인 파싱은 제공된 코드가 처리합니다.
+ * 본 과제에서 작성해야 할 것은 단 하나입니다:
+ *
+ *     ▶ 이미지 처리 필터 2개 이상 구현 + main 의 TODO 위치에 연결
+ *
+ * 또한 일관된 컨벤션과 예외 처리, 메모리 안정성도 함께 평가됩니다.
+ */
+
+#include "BmpParser.h"
+#include "CommandLineParser.h"
+#include "ImageBuffer.h"
+#include "Exceptions.h"
+
+
+#include <iostream>
+
+ // TODO: 본인이 구현한 필터 헤더를 include 하세요.
+ #include "GrayscaleFilter.h"
+ #include "ThresholdFilter.h"
+ #include "FlipFilter.h"
+ // ...
+
+void applyFilterByName(const std::string& filterName, ip::ImageBuffer& image);
+
+int main(int argc, char* argv[]) {
+    try {
+        // ── CLI 인자 파싱 (제공된 코드) ─────────────────────────
+        const ip::ProgramOptions options = ip::CommandLineParser::parse(argc, argv);
+
+        // ── BMP 로드 (제공된 코드) ──────────────────────────────
+        ip::ImageBuffer image = ip::BmpParser::loadFromFile(options.inputPath);
+        std::cout << "Loaded: " << image.width() << " x " << image.height() << "\n";
+
+        // ───────────────────────────────────────────────────────
+        // TODO: options.filterName 에 따라 적절한 필터를 생성하고
+        //       image 에 적용하세요.
+        //
+        //   예시 코드 (참고용):
+        //
+        //     if (options.filterName == "grayscale") {
+        //         GrayscaleFilter filter;
+        //         filter.apply(image);
+        //     }
+        //     else if (options.filterName == "threshold:128") {
+        //         ThresholdFilter filter(128);
+        //         filter.apply(image);
+        //     }
+        //     else {
+        //         throw ip::FilterError("Unknown filter: " + options.filterName);
+        //     }
+        //
+        //   ※ 가산점 항목:
+        //     - 추상 클래스(FilterBase) 기반 다형성 설계
+        //     - 필터 파이프라인 체인 (CLI 옵션 확장 필요)
+        //     - 멀티쓰레드 처리
+        //     - 로그 파일 출력 (CLI 옵션 확장 필요)
+        // ───────────────────────────────────────────────────────
+       
+        
+        // ↓ 여기에 필터 적용 코드를 작성하세요.
+        if (options.filterName == "grayscale") {
+            ip::GrayscaleFilter filter;
+            filter.apply(image);
+        }
+        else if (options.filterName.find("threshold") == 0) {
+            // "threshold:200" 형태에서 ':' 위치 찾기
+            std::size_t colonPos = options.filterName.find(':');        // 빈칸 1
+
+            if (colonPos == std::string::npos) {
+                throw ip::FilterError("threshold requires a value, e.g. threshold:128");
+            }
+
+            std::string valueStr = options.filterName.substr(colonPos+1);      // 빈칸 2
+            //std::cout << "DEBUG valueStr = [" << valueStr << "]" << std::endl;
+            int thresholdValue = std::stoi(valueStr);                          // 빈칸 3
+
+            ip::ThresholdFilter filter(thresholdValue);                             // 빈칸 4
+            filter.apply(image);                                           // 빈칸 5
+        }
+        else if (options.filterName.find("flip") == 0) {
+            std::size_t colonPos = options.filterName.find(':');
+
+            if (colonPos == std::string::npos) {
+                throw ip::FilterError("flip requires a direction, e.g. flip:vertical");
+            }
+
+            std::string direction = options.filterName.substr(colonPos + 1);
+
+            ip::FlipDirection dir;
+            if (direction == "vertical") {
+                dir = ip::FlipDirection::Vertical;
+            }
+            else if (direction == "horizontal") {
+                dir = ip::FlipDirection::Horizontal;   // 빈칸: 반대쪽 enum 값은 뭐였죠?
+            }
+            else {
+                throw ip::FilterError("Unknown flip direction: " + direction);
+            }
+
+            ip::FlipFilter filter(dir);
+            filter.apply(image);
+        }
+        else {
+            throw ip::FilterError("Unknown filter: " + options.filterName);
+        }
+       
+       std::string remaining = options.pipelineSpec;
+
+        while (!remaining.empty()) {
+            std::size_t commaPos = remaining.find(',');
+            std::string token;
+
+            if (commaPos == std::string::npos) {
+                // 쉼표가 더 없음 → 남은 전체가 마지막 조각
+                token = remaining;
+                remaining = "";
+            }
+            else {
+                token = remaining.substr(0, commaPos);         // 빈칸 1
+                remaining = remaining.substr(commaPos + 1);         // 빈칸 2
+            }
+
+            applyFilterByName(token, image);
+        }
+
+
+        // ── BMP 저장 (제공된 코드) ──────────────────────────────
+        ip::BmpParser::saveToFile(options.outputPath, image);
+        std::cout << "Saved:  " << options.outputPath << "\n";
+        return 0;
+    }
+    catch (const ip::ArgumentError& e) {
+        std::cerr << e.what() << "\n\n";
+        ip::CommandLineParser::printUsage(argc > 0 ? argv[0] : "ImageProcessor");
+        return 4;
+    }
+    catch (const ip::BmpParseError& e) {
+        std::cerr << e.what() << std::endl;
+        return 2;
+    }
+    catch (const ip::FilterError& e) {
+        std::cerr << e.what() << std::endl;
+        return 3;
+    }
+    catch (const std::exception& e) {
+        std::cerr << "Unexpected error: " << e.what() << std::endl;
+        return 1;
+    }
+}
+
+
+void applyFilterByName(const std::string& filterName, ip::ImageBuffer& image) {
+    if (filterName == "grayscale") {
+        ip::GrayscaleFilter filter;
+        filter.apply(image);
+    }
+    else if (filterName.find("threshold") == 0) {
+        std::size_t colonPos = filterName.find(':');
+        if (colonPos == std::string::npos) {
+            throw ip::FilterError("threshold requires a value, e.g. threshold:128");
+        }
+        std::string valueStr = filterName.substr(colonPos + 1);
+        int thresholdValue = std::stoi(valueStr);
+
+        ip::ThresholdFilter filter(thresholdValue);
+        filter.apply(image);
+    }
+    else if (filterName.find("flip") == 0) {
+        std::size_t colonPos = filterName.find(':');
+        if (colonPos == std::string::npos) {
+            throw ip::FilterError("flip requires a direction, e.g. flip:vertical");
+        }
+        std::string direction = filterName.substr(colonPos + 1);
+
+        ip::FlipDirection dir;
+        if (direction == "vertical") {
+            dir = ip::FlipDirection::Vertical;
+        }
+        else if (direction == "horizontal") {
+            dir = ip::FlipDirection::Horizontal;
+        }
+        else {
+            throw ip::FilterError("Unknown flip direction: " + direction);
+        }
+
+        ip::FlipFilter filter(dir);
+        filter.apply(image);
+    }
+    else {
+        throw ip::FilterError("Unknown filter: " + filterName);
+    }
+}
+

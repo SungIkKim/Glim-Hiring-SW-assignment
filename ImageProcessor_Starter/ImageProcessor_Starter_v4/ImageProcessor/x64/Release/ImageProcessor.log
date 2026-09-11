@@ -1,0 +1,19 @@
+﻿  main.cpp
+C:\Users\kqsci\OneDrive\바탕 화면\workSpace\ImageProcessor_Starter\ImageProcessor_Starter_v4\ImageProcessor\FlipFilter.h(1,1): warning C4828: 파일에 0x73 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+  (소스 파일 'main.cpp'을(를) 컴파일하는 중)
+  
+C:\Users\kqsci\OneDrive\바탕 화면\workSpace\ImageProcessor_Starter\ImageProcessor_Starter_v4\ImageProcessor\FlipFilter.h(1,1): warning C4828: 파일에 0x74 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+  (소스 파일 'main.cpp'을(를) 컴파일하는 중)
+  
+C:\Users\kqsci\OneDrive\바탕 화면\workSpace\ImageProcessor_Starter\ImageProcessor_Starter_v4\ImageProcessor\FlipFilter.h(1,1): warning C4828: 파일에 0x90 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+  (소스 파일 'main.cpp'을(를) 컴파일하는 중)
+  
+C:\Users\kqsci\OneDrive\바탕 화면\workSpace\ImageProcessor_Starter\ImageProcessor_Starter_v4\ImageProcessor\FlipFilter.h(1,1): warning C4828: 파일에 0x93 오프셋에서 시작하는 문자가 포함되어 있습니다. 이 문자는 현재 원본 문자 집합에서 잘못된 문자입니다(코드 페이지 65001).
+  (소스 파일 'main.cpp'을(를) 컴파일하는 중)
+  
+  코드를 생성하고 있습니다.
+  104 of 351 functions (29.6%) were compiled, the rest were copied from previous compilation.
+    11 functions were new in current compilation
+    48 functions had inline decision re-evaluated but remain unchanged
+  코드를 생성했습니다.
+  ImageProcessor.vcxproj -> C:\Users\kqsci\OneDrive\바탕 화면\workSpace\ImageProcessor_Starter\ImageProcessor_Starter_v4\x64\Release\ImageProcessor.exe
